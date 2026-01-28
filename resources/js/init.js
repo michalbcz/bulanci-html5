@@ -20,6 +20,8 @@ if( Meny.getQuery().u && Meny.getQuery().u.match( /^http/gi ) ) {
 
 document.addEventListener('DOMContentLoaded', function() {
     var game = new BULANCI.Game(true);
+    window.game = game; // Make game globally accessible for avatar updates
+    
     game.init(document.getElementById('game'), window.innerWidth, window.innerHeight);
     window.addEventListener('resize', function() {
         game.resize();
@@ -32,4 +34,28 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('mousemove', function(e) {
         game.handleMouseMove(e);
     });
+    
+    // Avatar change handler
+    game.onAvatarChanged = function(avatarData) {
+        // Update local player avatar in single player or multiplayer
+        if (game.players && game.players.length > 0) {
+            // In local 2P mode, update player 1
+            if (!game.isMultiplayer) {
+                game.players[0].setAvatar(avatarData);
+            }
+        }
+        
+        // In multiplayer, broadcast avatar change
+        if (game.multiplayerManager && game.myPlayerId) {
+            game.multiplayerManager.broadcastAvatarUpdate(avatarData);
+        }
+    };
+    
+    // Load and apply saved avatar for player 1
+    if (window.avatarManager) {
+        var savedAvatar = window.avatarManager.getAvatar();
+        if (savedAvatar && game.players && game.players.length > 0) {
+            game.players[0].setAvatar(savedAvatar);
+        }
+    }
 });

@@ -12,6 +12,12 @@
   <body>
     <div id="meny">
         <h1>Bulánci</h1>
+        
+        <!-- Avatar customization button -->
+        <div id="avatar-icon-btn" title="Customize your avatar">
+            <span id="avatar-icon-placeholder">👤</span>
+        </div>
+        
         <svg id="bulanci-logo" viewBox="0 0 577.259 309.238">
             <text x="230" y="-10" font-family="Bank Gothic" font-size="30" fill="white">
                 <tspan dy="1.2em">“Kdo se vleče,</tspan>
@@ -273,6 +279,51 @@
         <div id="multiplayer-lobby" style="display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000;">
             <!-- Lobby content will be dynamically inserted here -->
         </div>
+        
+        <!-- Avatar customization modal -->
+        <div id="avatar-modal" style="display:none;">
+            <div class="modal-content">
+                <button class="close-btn" id="avatar-modal-close">&times;</button>
+                <h2>Customize Avatar</h2>
+                
+                <div id="avatar-message-container"></div>
+                
+                <div class="avatar-preview">
+                    <div class="avatar-preview-circle" id="avatar-preview">
+                        <span>No avatar set</span>
+                    </div>
+                </div>
+                
+                <div class="avatar-options" id="avatar-upload-view">
+                    <button class="avatar-option-btn" id="upload-avatar-btn">
+                        📁 Upload Image
+                    </button>
+                    <button class="avatar-option-btn" id="camera-avatar-btn">
+                        📷 Take Photo
+                    </button>
+                    <button class="avatar-option-btn danger" id="remove-avatar-btn" style="display:none;">
+                        🗑️ Remove Avatar
+                    </button>
+                    <button class="avatar-option-btn secondary" id="avatar-cancel-btn">
+                        Cancel
+                    </button>
+                </div>
+                
+                <div class="camera-view" id="camera-view">
+                    <video id="camera-video" autoplay playsinline></video>
+                    <div class="camera-controls">
+                        <button class="avatar-option-btn success" id="capture-btn">
+                            📸 Capture
+                        </button>
+                        <button class="avatar-option-btn secondary" id="camera-cancel-btn">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                
+                <input type="file" id="avatar-file-input" accept="image/jpeg,image/jpg,image/png,image/gif" />
+            </div>
+        </div>
     </section>
 
     <!-- imports & JS -->
@@ -299,10 +350,12 @@
     <script src="resources/js/bulanci/Shoot.js"></script>
     <script src="resources/js/bulanci/Player.js"></script>
     <script src="resources/js/bulanci/Background.js"></script>
+    <script src="resources/js/bulanci/AvatarManager.js"></script>
     <script src="resources/js/bulanci/MultiplayerManager.js"></script>
     <script src="resources/js/bulanci/Game.js"></script>
 
     <script src="resources/js/audio.js"></script>
+    <script src="resources/js/avatar-ui.js"></script>
     <script src="resources/js/init.js"></script>
   </body>
 </html>

@@ -83,6 +83,12 @@ BULANCI.MultiplayerManager.prototype.createRoom = function() {
         self.myPeerId = id;
         console.log('Room created with ID:', id);
         
+        // Get local avatar if available
+        var localAvatar = null;
+        if (window.avatarManager) {
+            localAvatar = window.avatarManager.getAvatar();
+        }
+        
         // Update URL with room ID
         window.location.hash = self.roomId;
         
@@ -91,7 +97,8 @@ BULANCI.MultiplayerManager.prototype.createRoom = function() {
             peerId: self.myPeerId,
             ready: false,
             connection: null,
-            isMe: true
+            isMe: true,
+            avatar: localAvatar
         };
         
         self.updateLobbyUI();
@@ -129,10 +136,17 @@ BULANCI.MultiplayerManager.prototype.joinRoom = function(roomId) {
         conn.on('open', function() {
             console.log('Connected to host');
             
+            // Get local avatar if available
+            var localAvatar = null;
+            if (window.avatarManager) {
+                localAvatar = window.avatarManager.getAvatar();
+            }
+            
             // Send join request
             conn.send({
                 type: 'join',
-                peerId: self.myPeerId
+                peerId: self.myPeerId,
+                avatar: localAvatar
             });
         });
         
@@ -200,7 +214,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
                         peerId: data.peerId,
                         ready: false,
                         connection: conn,
-                        isMe: false
+                        isMe: false,
+                        avatar: data.avatar || null
                     };
                     
                     // Send assignment to joining player
@@ -214,7 +229,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
                     this.broadcast({
                         type: 'playerJoined',
                         playerId: newPlayerId,
-                        peerId: data.peerId
+                        peerId: data.peerId,
+                        avatar: data.avatar || null
                     }, data.peerId);
                     
                     // Connect new player to all existing players
@@ -252,7 +268,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
                     peerId: p.peerId,
                     ready: p.ready,
                     connection: p.playerId === 1 ? conn : null,
-                    isMe: p.playerId === this.playerId
+                    isMe: p.playerId === this.playerId,
+                    avatar: p.avatar || null
                 };
             }
             
@@ -265,7 +282,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
                 peerId: data.peerId,
                 ready: false,
                 connection: null,
-                isMe: false
+                isMe: false,
+                avatar: data.avatar || null
             };
             this.updateLobbyUI();
             break;
@@ -331,6 +349,18 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
             this.handlePlayerAction(data);
             break;
             
+        case 'avatarUpdate':
+            // Receive avatar update from peer
+            if (data.playerId && this.players[data.playerId]) {
+                this.players[data.playerId].avatar = data.avatar;
+                
+                // Update in-game player avatar if game is running
+                if (this.game && this.game.players && this.game.players[data.playerId - 1]) {
+                    this.game.players[data.playerId - 1].setAvatar(data.avatar);
+                }
+            }
+            break;
+            
         case 'playerDisconnected':
             this.handlePlayerDisconnect(data.peerId);
             break;
@@ -362,7 +392,8 @@ BULANCI.MultiplayerManager.prototype.getPlayerList = function() {
         list.push({
             playerId: parseInt(pid),
             peerId: this.players[pid].peerId,
-            ready: this.players[pid].ready
+            ready: this.players[pid].ready,
+            avatar: this.players[pid].avatar || null
         });
     }
     return list;
@@ -379,6 +410,30 @@ BULANCI.MultiplayerManager.prototype.broadcast = function(data, excludePeerId) {
             } catch(e) {
                 console.error('Error sending to peer:', peerId, e);
             }
+        }
+    }
+}
+
+/**
+ * Broadcast avatar update to all peers
+ */
+BULANCI.MultiplayerManager.prototype.broadcastAvatarUpdate = function(avatarData) {
+    if (this.playerId) {
+        // Update local player avatar
+        if (this.players[this.playerId]) {
+            this.players[this.playerId].avatar = avatarData;
+        }
+        
+        // Broadcast to all peers
+        this.broadcast({
+            type: 'avatarUpdate',
+            playerId: this.playerId,
+            avatar: avatarData
+        });
+        
+        // Update in-game player avatar if game is running
+        if (this.game && this.game.players && this.game.players[this.playerId - 1]) {
+            this.game.players[this.playerId - 1].setAvatar(avatarData);
         }
     }
 }
@@ -473,6 +528,14 @@ BULANCI.MultiplayerManager.prototype.startMultiplayerGame = function() {
     // Initialize game for number of players
     var playerCount = Object.keys(this.players).length;
     this.game.startMultiplayer(playerCount, this.playerId);
+    
+    // Apply avatars to players
+    for (var pid in this.players) {
+        var playerIndex = parseInt(pid) - 1;
+        if (this.game.players[playerIndex] && this.players[pid].avatar) {
+            this.game.players[playerIndex].setAvatar(this.players[pid].avatar);
+        }
+    }
     
     // Start syncing game state
     this.startGameSync();

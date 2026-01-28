@@ -38,6 +38,10 @@ BULANCI.Player = function(suffix) {
     this.shoots = []; // actual shooted bullets
     // this.weapons = [];
     // this.activeWeapon = weapons[0];
+    
+    // Avatar support
+    this.avatar = null; // Base64 encoded avatar image
+    this.avatarImage = null; // Cached Image object for avatar
 }
 inherits(BULANCI.Player, BULANCI.GameObject);
 
@@ -137,6 +141,29 @@ BULANCI.Player.prototype.drawHitbox = function(context) {
     context.stroke();
 }
 
+/**
+ * Set player avatar
+ */
+BULANCI.Player.prototype.setAvatar = function(avatarData) {
+    var self = this;
+    this.avatar = avatarData;
+    
+    if (avatarData) {
+        // Pre-load avatar image for better performance
+        this.avatarImage = new Image();
+        this.avatarImage.src = avatarData;
+    } else {
+        this.avatarImage = null;
+    }
+}
+
+/**
+ * Get player avatar
+ */
+BULANCI.Player.prototype.getAvatar = function() {
+    return this.avatar;
+}
+
     // (re)draw function
 BULANCI.Player.prototype.draw = function(context, images, ratio) {
     // shots
@@ -152,6 +179,47 @@ BULANCI.Player.prototype.draw = function(context, images, ratio) {
     this.drawShadow(context);
     //drawHitbox(context);
 
+    // Draw avatar if set, otherwise draw sprite
+    if (this.avatarImage && this.avatarImage.complete) {
+        this.drawAvatar(context);
+    } else {
+        this.drawSprite(context, images);
+    }
+}
+
+/**
+ * Draw player as circular avatar
+ */
+BULANCI.Player.prototype.drawAvatar = function(context) {
+    var avatarSize = 50;
+    var centerX = this.x + avatarSize / 2;
+    var centerY = this.y + avatarSize / 2;
+    
+    context.save();
+    
+    // Create circular clipping path
+    context.beginPath();
+    context.arc(centerX, centerY, avatarSize / 2, 0, Math.PI * 2);
+    context.closePath();
+    context.clip();
+    
+    // Draw avatar image
+    context.drawImage(this.avatarImage, this.x, this.y, avatarSize, avatarSize);
+    
+    context.restore();
+    
+    // Draw border around avatar
+    context.beginPath();
+    context.arc(centerX, centerY, avatarSize / 2, 0, Math.PI * 2);
+    context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    context.lineWidth = 2;
+    context.stroke();
+}
+
+/**
+ * Draw player sprite (original method)
+ */
+BULANCI.Player.prototype.drawSprite = function(context, images) {
     switch (this.direction) {
         case 1:
             //context.drawImage(images["bulanek/bulanek.png"],0,0,60,90,this.x,this.y,60,90);
