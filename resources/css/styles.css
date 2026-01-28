@@ -231,3 +231,162 @@ a.tooltip[title]:before {
 a.tooltip[title]:hover:before {
   display: block;
 }
+
+/* Multiplayer Lobby Styles */
+#multiplayer-lobby {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #fff;
+}
+
+#multiplayer-lobby .lobby-content {
+  background: rgba(20, 20, 20, 0.95);
+  padding: 40px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+#multiplayer-lobby h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 32px;
+  color: #fff;
+  font-family: 'Bank Gothic', sans-serif;
+}
+
+#multiplayer-lobby h3 {
+  margin: 20px 0 10px;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+#multiplayer-lobby .room-info {
+  background: rgba(50, 50, 50, 0.5);
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+#multiplayer-lobby .room-info p {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+#multiplayer-lobby #room-link {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+#multiplayer-lobby .room-info button {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 123, 255, 0.8);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#multiplayer-lobby .room-info button:hover {
+  background: rgba(0, 123, 255, 1);
+}
+
+#multiplayer-lobby .player-list {
+  margin: 20px 0;
+}
+
+#multiplayer-lobby .player-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+#multiplayer-lobby .player-list li {
+  padding: 12px 15px;
+  margin: 8px 0;
+  background: rgba(50, 50, 50, 0.5);
+  border-radius: 5px;
+  border-left: 4px solid rgba(100, 100, 100, 0.5);
+}
+
+#multiplayer-lobby .player-list li.player-1 {
+  border-left-color: rgba(255, 0, 0, 0.8);
+}
+
+#multiplayer-lobby .player-list li.player-2 {
+  border-left-color: rgba(0, 0, 255, 0.8);
+}
+
+#multiplayer-lobby .player-list li.player-3 {
+  border-left-color: rgba(0, 255, 0, 0.8);
+}
+
+#multiplayer-lobby .player-list li.player-4 {
+  border-left-color: rgba(255, 255, 0, 0.8);
+}
+
+#multiplayer-lobby .player-list li.empty-slot {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+#multiplayer-lobby .ready-button {
+  width: 100%;
+  padding: 15px;
+  font-size: 20px;
+  background: rgba(40, 167, 69, 0.8);
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+#multiplayer-lobby .ready-button:hover {
+  background: rgba(40, 167, 69, 1);
+}
+
+#multiplayer-lobby .ready-status {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+#multiplayer-lobby .countdown {
+  text-align: center;
+  padding: 60px;
+}
+
+#multiplayer-lobby .countdown h1 {
+  font-size: 120px;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+  animation: pulse 0.5s infinite alternate;
+  font-family: 'Bank Gothic', sans-serif;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
