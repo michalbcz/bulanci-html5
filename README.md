@@ -46,6 +46,7 @@ zpracovava a prekresluje hru.
 
 * hra pro 2 hrace na jednom PC (local multiplayer)
 * **online multiplayer pro 2-4 hráče přes WebRTC**
+* **vlastní avatary hráčů (upload nebo kamera)**
 * pohyb obou hracu zaroven (vice stisklych klaves najednou) na obrazovce
 * strely + odchytavani kolizi kulek
 * nahodny spawn na mape
@@ -61,6 +62,7 @@ je zde samozrejme prostor pro dalsi vychytavky:
 * lepsi stin bulanku
 * ~~kolize (hracu mezi sebou)~~
 * ~~online sitova hra~~
+* ~~vlastni avatar (upload nebo kamera)~~
 * zpresnit hitbox
 * nahodne prekazky na mape
 * offline app (manifest)
