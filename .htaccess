@@ -1,0 +1,16 @@
+# Ensure proper MIME types for assets
+AddType audio/mpeg .mp3
+AddType image/jpeg .jpg
+AddType image/png .png
+AddType application/javascript .js
+AddType text/css .css
+AddType font/ttf .ttf
+AddType font/woff .woff
+AddType font/woff2 .woff2
+AddType font/eot .eot
+AddType image/svg+xml .svg
+
+# Enable CORS for assets (if needed)
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+</IfModule>

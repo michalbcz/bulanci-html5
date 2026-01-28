@@ -52,11 +52,12 @@ BULANCI.MultiplayerManager.prototype.createRoom = function() {
     this.isHost = true;
     this.playerId = 1;
     
-    // Create peer with room ID
+    // Create peer with room ID using public PeerJS server
     this.peer = new Peer(this.roomId, {
-        host: 'peerjs-server.herokuapp.com',
+        host: '0.peerjs.com',
         secure: true,
         port: 443,
+        path: '/',
         config: {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -104,9 +105,10 @@ BULANCI.MultiplayerManager.prototype.joinRoom = function(roomId) {
     var myId = 'player-' + Math.random().toString(36).substring(7);
     
     this.peer = new Peer(myId, {
-        host: 'peerjs-server.herokuapp.com',
+        host: '0.peerjs.com',
         secure: true,
         port: 443,
+        path: '/',
         config: {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
