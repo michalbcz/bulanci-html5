@@ -27,6 +27,13 @@ BULANCI.MultiplayerManager = function(game) {
  * Initialize the multiplayer system
  */
 BULANCI.MultiplayerManager.prototype.init = function() {
+    // Check if PeerJS is available
+    if (typeof Peer === 'undefined') {
+        this.showError('PeerJS library not loaded. Multiplayer requires internet connection.');
+        console.error('PeerJS not found. Make sure the CDN is accessible.');
+        return;
+    }
+    
     // Check if we have a room ID in the URL hash
     var hash = window.location.hash.substring(1);
     
