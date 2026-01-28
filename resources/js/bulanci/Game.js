@@ -241,12 +241,19 @@ BULANCI.Game.prototype.drawMenu = function() {
     this.context.fillText('Player 1 controls:', this.width / 4, y);
     y += 40;
     this.context.fillText('WASD + spacebar', this.width / 4, y);
+    y += 30;
+    this.context.font = '14px "Helvetica"';
+    this.context.fillText('Weapons: 1-4', this.width / 4, y);
 
     y = this.height / 3;
+    this.context.font = '20px "Helvetica"';
     this.context.fillStyle = 'rgba(0,0,255,0.6)';
     this.context.fillText('Player 2 controls:', this.width / 4 * 3, y);
     y += 40;
     this.context.fillText('arrows + enter', this.width / 4 * 3, y);
+    y += 30;
+    this.context.font = '14px "Helvetica"';
+    this.context.fillText('Weapons: 7-0', this.width / 4 * 3, y);
 
     // new game button
     this.hud.elements['newGame'].redraw(this.context, '', this.width / 2 - 100, this.height / 2 - 100);
@@ -464,6 +471,30 @@ BULANCI.Game.prototype.keyBind = function() {
         }
         if(i == 32) { // spacebar
             this.players[0].shoot();
+        }
+        if(i == 49) { // key 1 - normal weapon for player 1
+            this.players[0].setWeapon('normal');
+        }
+        if(i == 50) { // key 2 - rapid fire for player 1
+            this.players[0].setWeapon('rapid');
+        }
+        if(i == 51) { // key 3 - sniper for player 1
+            this.players[0].setWeapon('sniper');
+        }
+        if(i == 52) { // key 4 - shotgun for player 1
+            this.players[0].setWeapon('shotgun');
+        }
+        if(i == 55) { // key 7 - normal weapon for player 2
+            this.players[1].setWeapon('normal');
+        }
+        if(i == 56) { // key 8 - rapid fire for player 2
+            this.players[1].setWeapon('rapid');
+        }
+        if(i == 57) { // key 9 - sniper for player 2
+            this.players[1].setWeapon('sniper');
+        }
+        if(i == 48) { // key 0 - shotgun for player 2
+            this.players[1].setWeapon('shotgun');
         }
         if(i >= 37 && i <= 40) { // arrows
             this.players[1].move(directions[i], this.canvas, this.elementList);
