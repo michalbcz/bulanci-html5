@@ -20,7 +20,24 @@ BULANCI.MultiplayerManager = function(game) {
     
     // State synchronization
     this.lastSyncTime = 0;
-    this.syncInterval = 50; // ms
+    this.syncInterval = 50; // ms - 20 updates/sec for responsive multiplayer
+    this.syncIntervalId = null; // Store interval ID for cleanup
+    this.countdownIntervalId = null; // Store countdown interval ID
+    this.countdownStarted = false; // Prevent duplicate countdowns
+    
+    // PeerJS configuration (shared between createRoom and joinRoom)
+    this.peerConfig = {
+        host: '0.peerjs.com',
+        secure: true,
+        port: 443,
+        path: '/',
+        config: {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        }
+    };
 }
 
 /**
@@ -59,19 +76,8 @@ BULANCI.MultiplayerManager.prototype.createRoom = function() {
     this.isHost = true;
     this.playerId = 1;
     
-    // Create peer with room ID using public PeerJS server
-    this.peer = new Peer(this.roomId, {
-        host: '0.peerjs.com',
-        secure: true,
-        port: 443,
-        path: '/',
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        }
-    });
+    // Create peer with room ID using shared config
+    this.peer = new Peer(this.roomId, this.peerConfig);
     
     this.peer.on('open', function(id) {
         self.myPeerId = id;
@@ -111,18 +117,7 @@ BULANCI.MultiplayerManager.prototype.joinRoom = function(roomId) {
     // Create peer with random ID
     var myId = 'player-' + Math.random().toString(36).substring(7);
     
-    this.peer = new Peer(myId, {
-        host: '0.peerjs.com',
-        secure: true,
-        port: 443,
-        path: '/',
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        }
-    });
+    this.peer = new Peer(myId, this.peerConfig);
     
     this.peer.on('open', function(id) {
         self.myPeerId = id;
@@ -294,8 +289,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
             break;
             
         case 'ready':
-            // Player marked as ready
-            if (this.players[data.playerId]) {
+            // Player marked as ready - validate playerId
+            if (data.playerId && this.players[data.playerId]) {
                 this.players[data.playerId].ready = true;
                 this.readyPlayers.add(data.playerId);
             }
@@ -310,8 +305,8 @@ BULANCI.MultiplayerManager.prototype.handleMessage = function(data, conn) {
             
             this.updateLobbyUI();
             
-            // Check if all players are ready
-            if (this.isHost && this.allPlayersReady()) {
+            // Check if all players are ready (prevent race condition)
+            if (this.isHost && this.allPlayersReady() && !this.countdownStarted) {
                 this.startCountdown();
             }
             break;
@@ -405,8 +400,8 @@ BULANCI.MultiplayerManager.prototype.markReady = function() {
         
         this.updateLobbyUI();
         
-        // If host and all ready, start countdown
-        if (this.isHost && this.allPlayersReady()) {
+        // If host and all ready, start countdown (check for race condition)
+        if (this.isHost && this.allPlayersReady() && !this.countdownStarted) {
             this.startCountdown();
         }
     }
@@ -433,6 +428,12 @@ BULANCI.MultiplayerManager.prototype.allPlayersReady = function() {
 BULANCI.MultiplayerManager.prototype.startCountdown = function() {
     var self = this;
     
+    // Prevent duplicate countdowns
+    if (this.countdownStarted) {
+        return;
+    }
+    this.countdownStarted = true;
+    
     // Notify all players to start countdown
     if (this.isHost) {
         this.broadcast({
@@ -441,12 +442,13 @@ BULANCI.MultiplayerManager.prototype.startCountdown = function() {
     }
     
     var countdown = 3;
-    var countdownInterval = setInterval(function() {
+    this.countdownIntervalId = setInterval(function() {
         self.updateCountdownUI(countdown);
         countdown--;
         
         if (countdown < 0) {
-            clearInterval(countdownInterval);
+            clearInterval(self.countdownIntervalId);
+            self.countdownIntervalId = null;
             
             // Start game
             if (self.isHost) {
@@ -482,7 +484,12 @@ BULANCI.MultiplayerManager.prototype.startMultiplayerGame = function() {
 BULANCI.MultiplayerManager.prototype.startGameSync = function() {
     var self = this;
     
-    setInterval(function() {
+    // Clear any existing sync interval
+    if (this.syncIntervalId) {
+        clearInterval(this.syncIntervalId);
+    }
+    
+    this.syncIntervalId = setInterval(function() {
         if (self.gameStarted && self.game.status === 1) {
             // Send our player state to all peers
             var myPlayer = self.game.players[self.playerId - 1];
@@ -512,24 +519,39 @@ BULANCI.MultiplayerManager.prototype.startGameSync = function() {
  * Handle player action update
  */
 BULANCI.MultiplayerManager.prototype.handlePlayerAction = function(data) {
-    if (this.game.status === 1 && data.playerId !== this.playerId) {
+    // Validate data
+    if (!data || !data.playerId || data.playerId === this.playerId) {
+        return;
+    }
+    
+    // Validate position data (prevent malicious values)
+    if (typeof data.x !== 'number' || typeof data.y !== 'number' ||
+        data.x < 0 || data.x > this.game.width ||
+        data.y < 0 || data.y > this.game.height) {
+        console.warn('Invalid player position data received');
+        return;
+    }
+    
+    if (this.game.status === 1) {
         var playerIndex = data.playerId - 1;
         if (this.game.players[playerIndex]) {
             var player = this.game.players[playerIndex];
             
-            // Update position with interpolation for smooth movement
+            // Update position
             player.x = data.x;
             player.y = data.y;
-            player.direction = data.direction;
+            player.direction = data.direction || 1;
             
-            // Sync shoots
-            if (data.shoots) {
-                player.shoots = data.shoots.map(function(s) {
+            // Sync shoots (with validation)
+            if (data.shoots && Array.isArray(data.shoots)) {
+                player.shoots = data.shoots.filter(function(s) {
+                    return s && typeof s.x === 'number' && typeof s.y === 'number';
+                }).map(function(s) {
                     var shoot = new BULANCI.Shoot();
                     shoot.x = s.x;
                     shoot.y = s.y;
-                    shoot.direction = s.direction;
-                    shoot.isActive = s.isActive;
+                    shoot.direction = s.direction || 1;
+                    shoot.isActive = s.isActive !== false;
                     return shoot;
                 });
             }
@@ -567,9 +589,18 @@ BULANCI.MultiplayerManager.prototype.handlePlayerDisconnect = function(peerId) {
 }
 
 /**
- * Generate random room ID
+ * Generate random room ID using crypto API if available
  */
 BULANCI.MultiplayerManager.prototype.generateRoomId = function() {
+    // Try to use crypto API for better randomness
+    if (window.crypto && window.crypto.getRandomValues) {
+        var array = new Uint8Array(4);
+        window.crypto.getRandomValues(array);
+        return Array.from(array, function(byte) {
+            return ('0' + byte.toString(36)).slice(-2);
+        }).join('').substring(0, 6).toUpperCase();
+    }
+    // Fallback to Math.random()
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
@@ -656,6 +687,41 @@ BULANCI.MultiplayerManager.prototype.hideLobbyUI = function() {
 }
 
 /**
+ * Cleanup multiplayer resources
+ */
+BULANCI.MultiplayerManager.prototype.cleanup = function() {
+    // Clear intervals
+    if (this.syncIntervalId) {
+        clearInterval(this.syncIntervalId);
+        this.syncIntervalId = null;
+    }
+    if (this.countdownIntervalId) {
+        clearInterval(this.countdownIntervalId);
+        this.countdownIntervalId = null;
+    }
+    
+    // Close all connections
+    for (var peerId in this.connections) {
+        if (this.connections[peerId]) {
+            this.connections[peerId].close();
+        }
+    }
+    this.connections = {};
+    
+    // Destroy peer
+    if (this.peer) {
+        this.peer.destroy();
+        this.peer = null;
+    }
+    
+    // Reset state
+    this.gameStarted = false;
+    this.countdownStarted = false;
+    this.players = {};
+    this.readyPlayers.clear();
+}
+
+/**
  * Show error message
  */
 BULANCI.MultiplayerManager.prototype.showError = function(message) {
@@ -668,8 +734,47 @@ BULANCI.MultiplayerManager.prototype.showError = function(message) {
 function copyRoomLink() {
     var linkInput = document.getElementById('room-link');
     if (linkInput) {
-        linkInput.select();
-        document.execCommand('copy');
-        alert('Room link copied to clipboard!');
+        var linkText = linkInput.value;
+        
+        // Try modern Clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(linkText).then(function() {
+                showCopySuccess();
+            }).catch(function(err) {
+                // Fallback to older method
+                fallbackCopyToClipboard(linkInput);
+            });
+        } else {
+            // Fallback to older method
+            fallbackCopyToClipboard(linkInput);
+        }
     }
+}
+
+/**
+ * Fallback clipboard copy method
+ */
+function fallbackCopyToClipboard(input) {
+    input.select();
+    try {
+        document.execCommand('copy');
+        showCopySuccess();
+    } catch (err) {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy link. Please copy manually.');
+    }
+}
+
+/**
+ * Show copy success message
+ */
+function showCopySuccess() {
+    var button = event.target;
+    var originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.style.background = 'rgba(40, 167, 69, 1)';
+    setTimeout(function() {
+        button.textContent = originalText;
+        button.style.background = '';
+    }, 2000);
 }
