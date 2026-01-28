@@ -419,6 +419,17 @@ BULANCI.MultiplayerManager.prototype.broadcast = function(data, excludePeerId) {
  */
 BULANCI.MultiplayerManager.prototype.broadcastAvatarUpdate = function(avatarData) {
     if (this.playerId) {
+        // Validate avatar data size (WebRTC has message size limits)
+        if (avatarData) {
+            var sizeInBytes = new Blob([avatarData]).size;
+            var maxSize = 100 * 1024; // 100KB conservative limit for WebRTC
+            if (sizeInBytes > maxSize) {
+                console.warn('Avatar too large for WebRTC transmission:', sizeInBytes, 'bytes');
+                this.showError('Avatar too large for multiplayer sharing. Please use a smaller image.');
+                return;
+            }
+        }
+        
         // Update local player avatar
         if (this.players[this.playerId]) {
             this.players[this.playerId].avatar = avatarData;

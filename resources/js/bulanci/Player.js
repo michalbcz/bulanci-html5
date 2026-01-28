@@ -148,12 +148,24 @@ BULANCI.Player.prototype.setAvatar = function(avatarData) {
     var self = this;
     this.avatar = avatarData;
     
+    // Clean up old image to prevent memory leaks
+    if (this.avatarImage) {
+        this.avatarImage.onload = null;
+        this.avatarImage.onerror = null;
+        this.avatarImage = null;
+    }
+    
     if (avatarData) {
         // Pre-load avatar image for better performance
         this.avatarImage = new Image();
+        this.avatarImage.onload = function() {
+            // Image loaded successfully, will render on next draw
+        };
+        this.avatarImage.onerror = function() {
+            console.warn('Failed to load avatar image');
+            self.avatarImage = null;
+        };
         this.avatarImage.src = avatarData;
-    } else {
-        this.avatarImage = null;
     }
 }
 

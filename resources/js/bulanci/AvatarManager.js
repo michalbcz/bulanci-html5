@@ -37,12 +37,24 @@ BULANCI.AvatarManager.prototype.loadAvatar = function() {
 BULANCI.AvatarManager.prototype.saveAvatar = function(avatarData) {
     try {
         if (avatarData) {
+            // Check size before storing (localStorage has ~5-10MB limit typically)
+            var sizeInBytes = new Blob([avatarData]).size;
+            if (sizeInBytes > 1024 * 1024) { // 1MB limit for safety
+                console.warn('Avatar too large for localStorage');
+                return false;
+            }
+            
             localStorage.setItem(this.storageKey, avatarData);
             this.currentAvatar = avatarData;
             return true;
         }
     } catch(e) {
-        console.warn('Failed to save avatar to localStorage:', e);
+        if (e.name === 'QuotaExceededError') {
+            console.warn('localStorage quota exceeded. Avatar not saved.');
+            alert('Unable to save avatar: Storage quota exceeded. Try a smaller image or clear browser data.');
+        } else {
+            console.warn('Failed to save avatar to localStorage:', e);
+        }
         return false;
     }
     return false;
@@ -75,9 +87,9 @@ BULANCI.AvatarManager.prototype.getAvatar = function() {
 BULANCI.AvatarManager.prototype.processImageFile = function(file, callback) {
     var self = this;
     
-    // Validate file type
-    if (!file.type.match(/^image\/(jpeg|jpg|png|gif)$/)) {
-        callback(new Error('Invalid file type. Please use JPG, PNG, or GIF.'));
+    // Validate file type (including webp)
+    if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
+        callback(new Error('Invalid file type. Please use JPG, PNG, GIF, or WebP.'));
         return;
     }
     

@@ -281,15 +281,15 @@
         </div>
         
         <!-- Avatar customization modal -->
-        <div id="avatar-modal" style="display:none;">
+        <div id="avatar-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="avatar-modal-title">
             <div class="modal-content">
-                <button class="close-btn" id="avatar-modal-close">&times;</button>
-                <h2>Customize Avatar</h2>
+                <button class="close-btn" id="avatar-modal-close" aria-label="Close">&times;</button>
+                <h2 id="avatar-modal-title">Customize Avatar</h2>
                 
                 <div id="avatar-message-container"></div>
                 
                 <div class="avatar-preview">
-                    <div class="avatar-preview-circle" id="avatar-preview">
+                    <div class="avatar-preview-circle" id="avatar-preview" role="img" aria-label="Avatar preview">
                         <span>No avatar set</span>
                     </div>
                 </div>
@@ -310,7 +310,7 @@
                 </div>
                 
                 <div class="camera-view" id="camera-view">
-                    <video id="camera-video" autoplay playsinline></video>
+                    <video id="camera-video" autoplay playsinline aria-label="Camera preview for avatar capture"></video>
                     <div class="camera-controls">
                         <button class="avatar-option-btn success" id="capture-btn">
                             📸 Capture
@@ -321,7 +321,7 @@
                     </div>
                 </div>
                 
-                <input type="file" id="avatar-file-input" accept="image/jpeg,image/jpg,image/png,image/gif" />
+                <input type="file" id="avatar-file-input" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" />
             </div>
         </div>
     </section>

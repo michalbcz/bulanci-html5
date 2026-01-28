@@ -50,8 +50,20 @@
             clearMessage();
         }
         
+        // Keyboard accessibility: close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && avatarModal.style.display === 'flex') {
+                closeModal();
+            }
+        });
+        
         avatarModalClose.addEventListener('click', closeModal);
         avatarCancelBtn.addEventListener('click', closeModal);
+        
+        // Cleanup camera on page unload
+        window.addEventListener('beforeunload', function() {
+            stopCamera();
+        });
         
         // Upload button
         uploadBtn.addEventListener('click', function() {
@@ -120,6 +132,7 @@
         
         // Remove avatar button
         removeBtn.addEventListener('click', function() {
+            // Custom confirmation dialog would be better, but using confirm for simplicity
             if (confirm('Are you sure you want to remove your avatar?')) {
                 avatarManager.removeAvatar();
                 updateAvatarDisplay();
@@ -155,13 +168,17 @@
             }
         }
         
-        // Update avatar display
+        // Update avatar display (using createElement for security)
         function updateAvatarDisplay() {
             var avatar = avatarManager.getAvatar();
             
             // Update preview in modal
             if (avatar) {
-                avatarPreview.innerHTML = '<img src="' + avatar + '" alt="Avatar" />';
+                avatarPreview.innerHTML = '';
+                var img = document.createElement('img');
+                img.src = avatar;
+                img.alt = 'Avatar';
+                avatarPreview.appendChild(img);
                 removeBtn.style.display = 'block';
             } else {
                 avatarPreview.innerHTML = '<span>No avatar set</span>';
@@ -170,7 +187,11 @@
             
             // Update icon in menu
             if (avatar) {
-                avatarIconPlaceholder.innerHTML = '<img src="' + avatar + '" alt="Avatar" />';
+                avatarIconPlaceholder.innerHTML = '';
+                var iconImg = document.createElement('img');
+                iconImg.src = avatar;
+                iconImg.alt = 'Avatar';
+                avatarIconPlaceholder.appendChild(iconImg);
             } else {
                 avatarIconPlaceholder.innerHTML = '👤';
             }

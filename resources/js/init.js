@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update local player avatar in single player or multiplayer
         if (game.players && game.players.length > 0) {
             // In local 2P mode, update player 1
-            if (!game.isMultiplayer) {
+            if (!game.isMultiplayer && game.players[0]) {
                 game.players[0].setAvatar(avatarData);
             }
         }
@@ -51,11 +51,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Load and apply saved avatar for player 1
-    if (window.avatarManager) {
-        var savedAvatar = window.avatarManager.getAvatar();
-        if (savedAvatar && game.players && game.players.length > 0) {
-            game.players[0].setAvatar(savedAvatar);
+    // Load and apply saved avatar for player 1 when game is ready
+    setTimeout(function() {
+        if (window.avatarManager) {
+            var savedAvatar = window.avatarManager.getAvatar();
+            if (savedAvatar && game.players && game.players.length > 0 && game.players[0]) {
+                game.players[0].setAvatar(savedAvatar);
+            }
         }
-    }
+    }, 100); // Small delay to ensure players are initialized
 });
