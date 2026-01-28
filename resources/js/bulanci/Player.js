@@ -278,9 +278,14 @@ BULANCI.Player.prototype.drawShadow = function(context) {
 }
 
 BULANCI.Player.prototype.isShootedBy = function(x1, y1) {
-    if(x1 >= this.x && x1 <= this.x + this.width) {
-
-        if(y1 >= (this.y+5) && y1 <= (this.y+5) + this.height) {
+    // More precise hitbox - adjusting for actual body area (not including gun)
+    var hitboxX = this.x + 5;
+    var hitboxY = this.y + 10;
+    var hitboxWidth = this.width - 10;
+    var hitboxHeight = this.height - 5;
+    
+    if(x1 >= hitboxX && x1 <= hitboxX + hitboxWidth) {
+        if(y1 >= hitboxY && y1 <= hitboxY + hitboxHeight) {
             return true;
         }
     }

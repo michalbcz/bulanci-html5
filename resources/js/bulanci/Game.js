@@ -40,6 +40,7 @@ BULANCI.Game = function(debug) {
 
     this.map;
     this.players = [];
+    this.obstacles = [];
     // terrain
 
     this.elementList = [];
@@ -99,16 +100,19 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
     this.map = new BULANCI.Background();
 
     // this.elementList.push(this.map);
+    
+    // Generate random obstacles
+    this.generateObstacles();
 
     var bulanek = new BULANCI.Player('-red');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.spawn(this.width, this.height, this.obstacles);
     this.players.push(bulanek);
     
     bulanek = new BULANCI.Player('-blue');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.spawn(this.width, this.height, this.obstacles);
     this.players.push(bulanek);
 
-    this.elementList = this.elementList.concat(this.players);
+    this.elementList = this.elementList.concat(this.players).concat(this.obstacles);
 
     // HUD
     this.hud = new BULANCI.HUD();
@@ -145,6 +149,25 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
 }
 
 /**
+ * Generate random obstacles on the map
+ */
+BULANCI.Game.prototype.generateObstacles = function() {
+    var numObstacles = 3 + Math.floor(Math.random() * 3); // 3-5 obstacles
+    var minSize = 60;
+    var maxSize = 120;
+    
+    for(var i = 0; i < numObstacles; i++) {
+        var width = minSize + Math.random() * (maxSize - minSize);
+        var height = minSize + Math.random() * (maxSize - minSize);
+        var x = 100 + Math.random() * (this.width - 200 - width);
+        var y = 100 + Math.random() * (this.height - 200 - height);
+        
+        var obstacle = new BULANCI.Obstacle(x, y, width, height);
+        this.obstacles.push(obstacle);
+    }
+}
+
+/**
  * Main loop of the game.
  * All of the logic is processed here.
  */
@@ -154,6 +177,17 @@ BULANCI.Game.prototype.update = function() {
     for(i = 0; i < this.players.length; i++) {
         var shoots = this.players[i].getShoots();
         for(s = 0; s < shoots.length; s++) {
+            // Check collision with obstacles
+            for(o = 0; o < this.obstacles.length; o++) {
+                var obstacle = this.obstacles[o];
+                var sx = shoots[s].getX();
+                var sy = shoots[s].getY();
+                
+                if(sx >= obstacle.x && sx <= obstacle.x + obstacle.width &&
+                   sy >= obstacle.y && sy <= obstacle.y + obstacle.height) {
+                    shoots[s].setIsActive(false);
+                }
+            }
 
             for(p = 0; p < this.players.length; p++) {
                 if(p != i && this.players[p].isShootedBy(shoots[s].getX(), shoots[s].getY())) {
@@ -272,6 +306,12 @@ BULANCI.Game.prototype.redraw = function() {
     this.clearCanvas();
     // redraw map
     this.map.draw(this.context, this.images);
+    
+    // redraw obstacles
+    for(var i = 0; i < this.obstacles.length; i++) {
+        this.obstacles[i].draw(this.context);
+    }
+    
     // redraw hud
     // hud.redraw(context);
     this.hud.elements['score1'].redraw(this.context, 'score: ' + this.players[0].getScore(), 20, this.height-50);
@@ -365,6 +405,11 @@ BULANCI.Game.prototype.start = function() {
 BULANCI.Game.prototype.restart = function() {
     this.remainingTime = this.defaultGametime;
     this.status = 1;
+    
+    // Regenerate obstacles for new game
+    this.obstacles = [];
+    this.generateObstacles();
+    this.elementList = this.elementList.concat(this.obstacles);
 }
 
 BULANCI.Game.prototype.setGametime = function(time) {
@@ -470,6 +515,10 @@ BULANCI.Game.prototype.resize = function() {
     // redraw other elements
     for(i = 0; i < this.players.length; i++) {
         this.players[i].uniform(xRatio, yRatio);
+    }
+    
+    for(i = 0; i < this.obstacles.length; i++) {
+        this.obstacles[i].uniform(xRatio, yRatio);
     }
 
 }
