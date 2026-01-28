@@ -35,6 +35,13 @@ BULANCI.Weapon = function(type) {
             this.name = 'Shotgun';
             this.bulletCount = 3; // fires multiple bullets
             break;
+        default:
+            // Default to normal weapon
+            this.speed = 25;
+            this.fireRate = 400;
+            this.bulletColor = '#ffd649';
+            this.name = 'Normal';
+            break;
     }
 }
 

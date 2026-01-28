@@ -95,7 +95,7 @@ BULANCI.Player.prototype.move = function(key, canvas, obstacles) {
 }
 
 BULANCI.Player.prototype.hasCollision = function(x, y, obstacles) {
-    for(i = 0; i < obstacles.length; i++) {
+    for(var i = 0; i < obstacles.length; i++) {
         var r = obstacles[i];
         if(this != r) {
             if ( x + this.width < r.x || r.x + r.width < x || y + this.height < r.y || r.y + r.height < y ) {
@@ -126,7 +126,7 @@ BULANCI.Player.prototype.shoot = function(a) {
         
         // Fire multiple bullets for shotgun
         for(var i = 0; i < bulletCount; i++) {
-            shoot = new BULANCI.Shoot(this.x, this.y, color);
+            var shoot = new BULANCI.Shoot(this.x, this.y, color);
             var direction = this.direction;
             
             // Spread bullets for shotgun

@@ -178,13 +178,16 @@ BULANCI.Game.prototype.update = function() {
         var shoots = this.players[i].getShoots();
         for(s = 0; s < shoots.length; s++) {
             // Check collision with obstacles
-            for(o = 0; o < this.obstacles.length; o++) {
+            for(var o = 0; o < this.obstacles.length; o++) {
                 var obstacle = this.obstacles[o];
                 var sx = shoots[s].getX();
                 var sy = shoots[s].getY();
+                var sw = shoots[s].width;
+                var sh = shoots[s].height;
                 
-                if(sx >= obstacle.x && sx <= obstacle.x + obstacle.width &&
-                   sy >= obstacle.y && sy <= obstacle.y + obstacle.height) {
+                // Check if bullet rectangle overlaps with obstacle
+                if(sx + sw >= obstacle.x && sx <= obstacle.x + obstacle.width &&
+                   sy + sh >= obstacle.y && sy <= obstacle.y + obstacle.height) {
                     shoots[s].setIsActive(false);
                 }
             }
@@ -194,7 +197,7 @@ BULANCI.Game.prototype.update = function() {
                     shoots[s].setIsActive(false);
                     this.players[i].setScore();
                     this.players[p].death();
-                    this.players[p].respawn(this.width, this.height, this.elementList);
+                    this.players[p].respawn(this.width, this.height, this.obstacles);
                 }
             }
         }
@@ -413,10 +416,12 @@ BULANCI.Game.prototype.restart = function() {
     this.remainingTime = this.defaultGametime;
     this.status = 1;
     
-    // Regenerate obstacles for new game
+    // Clear old obstacles and regenerate
     this.obstacles = [];
     this.generateObstacles();
-    this.elementList = this.elementList.concat(this.obstacles);
+    
+    // Rebuild element list with players and new obstacles
+    this.elementList = this.players.concat(this.obstacles);
 }
 
 BULANCI.Game.prototype.setGametime = function(time) {
