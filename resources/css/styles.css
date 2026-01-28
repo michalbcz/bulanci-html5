@@ -390,3 +390,212 @@ a.tooltip[title]:hover:before {
     opacity: 1;
   }
 }
+
+/* Avatar Customization Modal */
+#avatar-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#avatar-modal .modal-content {
+  background: rgba(20, 20, 20, 0.95);
+  padding: 40px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+  color: #fff;
+  position: relative;
+}
+
+#avatar-modal h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  color: #fff;
+  font-family: 'Bank Gothic', sans-serif;
+}
+
+#avatar-modal .close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  transition: color 0.3s;
+}
+
+#avatar-modal .close-btn:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+#avatar-modal .avatar-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+#avatar-modal .avatar-preview-circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(50, 50, 50, 0.5);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+#avatar-modal .avatar-preview-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#avatar-modal .avatar-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+#avatar-modal .avatar-option-btn {
+  padding: 15px;
+  font-size: 16px;
+  background: rgba(0, 123, 255, 0.8);
+  border: none;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-weight: bold;
+}
+
+#avatar-modal .avatar-option-btn:hover {
+  background: rgba(0, 123, 255, 1);
+}
+
+#avatar-modal .avatar-option-btn.secondary {
+  background: rgba(108, 117, 125, 0.8);
+}
+
+#avatar-modal .avatar-option-btn.secondary:hover {
+  background: rgba(108, 117, 125, 1);
+}
+
+#avatar-modal .avatar-option-btn.danger {
+  background: rgba(220, 53, 69, 0.8);
+}
+
+#avatar-modal .avatar-option-btn.danger:hover {
+  background: rgba(220, 53, 69, 1);
+}
+
+#avatar-modal .avatar-option-btn.success {
+  background: rgba(40, 167, 69, 0.8);
+}
+
+#avatar-modal .avatar-option-btn.success:hover {
+  background: rgba(40, 167, 69, 1);
+}
+
+#avatar-modal input[type="file"] {
+  display: none;
+}
+
+#avatar-modal .error-message {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+#avatar-modal .success-message {
+  background: rgba(40, 167, 69, 0.2);
+  border: 1px solid rgba(40, 167, 69, 0.5);
+  color: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Camera capture view */
+#avatar-modal .camera-view {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+#avatar-modal .camera-view video {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  background: #000;
+}
+
+#avatar-modal .camera-controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+#avatar-modal .camera-controls button {
+  flex: 1;
+}
+
+/* Avatar icon button in menu */
+#avatar-icon-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(50, 50, 50, 0.8);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  margin: 20px auto;
+}
+
+#avatar-icon-btn:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+#avatar-icon-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
