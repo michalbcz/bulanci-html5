@@ -44,6 +44,11 @@ BULANCI.Game = function(debug) {
 
     this.elementList = [];
     this.hud = [];
+    
+    // Multiplayer
+    this.isMultiplayer = false;
+    this.multiplayerManager = null;
+    this.myPlayerId = null;
 }
 
 BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
@@ -100,15 +105,18 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
 
     // this.elementList.push(this.map);
 
-    var bulanek = new BULANCI.Player('-red');
-    bulanek.spawn(this.width, this.height, []);
-    this.players.push(bulanek);
-    
-    bulanek = new BULANCI.Player('-blue');
-    bulanek.spawn(this.width, this.height, []);
-    this.players.push(bulanek);
+    // Initialize players for local 2-player mode (will be overridden for multiplayer)
+    if (!this.isMultiplayer) {
+        var bulanek = new BULANCI.Player('-red');
+        bulanek.spawn(this.width, this.height, []);
+        this.players.push(bulanek);
+        
+        bulanek = new BULANCI.Player('-blue');
+        bulanek.spawn(this.width, this.height, []);
+        this.players.push(bulanek);
 
-    this.elementList = this.elementList.concat(this.players);
+        this.elementList = this.elementList.concat(this.players);
+    }
 
     // HUD
     this.hud = new BULANCI.HUD();
@@ -133,10 +141,15 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
     this.hud.elements['time'] = time;
 
     // main menu
-    var newGame = new BULANCI.RoundedButton('New game', this.width / 2 - 100, this.height / 2 - 100, 200, 100);
-    newGame.font = '26px "Helvetica"';
+    var newGame = new BULANCI.RoundedButton('Local 2P', this.width / 2 - 100, this.height / 2 - 120, 200, 80);
+    newGame.font = '24px "Helvetica"';
     newGame.textColor = 'rgba(255,255,255,.8)';
     this.hud.elements['newGame'] = newGame;
+    
+    var multiplayerBtn = new BULANCI.RoundedButton('Multiplayer', this.width / 2 - 100, this.height / 2 - 20, 200, 80);
+    multiplayerBtn.font = '24px "Helvetica"';
+    multiplayerBtn.textColor = 'rgba(255,255,255,.8)';
+    this.hud.elements['multiplayer_btn'] = multiplayerBtn;
 
     var again = new BULANCI.RoundedButton('Play again?', this.width / 2 - 100, this.height / 2 - 100, 200, 100);
     again.font = '26px "Helvetica"';
@@ -200,22 +213,25 @@ BULANCI.Game.prototype.drawMenu = function() {
     this.context.fillText('Bulánci', this.width / 2, 50);
     this.context.drawImage(this.images['logo.png'], this.width / 2 - 100, 100, 300, 161);
 
-    this.context.font = '20px "Helvetica"';
+    this.context.font = '18px "Helvetica"';
 
-    var y = this.height / 3;
-    this.context.fillStyle = 'rgba(255,0,0,0.6)';
-    this.context.fillText('Player 1 controls:', this.width / 4, y);
-    y += 40;
-    this.context.fillText('WASD + spacebar', this.width / 4, y);
+    if (!this.isMultiplayer) {
+        var y = this.height / 3;
+        this.context.fillStyle = 'rgba(255,0,0,0.6)';
+        this.context.fillText('Player 1 controls:', this.width / 4, y);
+        y += 30;
+        this.context.fillText('WASD + spacebar', this.width / 4, y);
 
-    y = this.height / 3;
-    this.context.fillStyle = 'rgba(0,0,255,0.6)';
-    this.context.fillText('Player 2 controls:', this.width / 4 * 3, y);
-    y += 40;
-    this.context.fillText('arrows + enter', this.width / 4 * 3, y);
+        y = this.height / 3;
+        this.context.fillStyle = 'rgba(0,0,255,0.6)';
+        this.context.fillText('Player 2 controls:', this.width / 4 * 3, y);
+        y += 30;
+        this.context.fillText('arrows + enter', this.width / 4 * 3, y);
+    }
 
     // new game button
-    this.hud.elements['newGame'].redraw(this.context, '', this.width / 2 - 100, this.height / 2 - 100);
+    this.hud.elements['newGame'].redraw(this.context, '', this.width / 2 - 100, this.height / 2 - 120);
+    this.hud.elements['multiplayer_btn'].redraw(this.context, '', this.width / 2 - 100, this.height / 2 - 20);
 
 }
 
@@ -274,8 +290,15 @@ BULANCI.Game.prototype.redraw = function() {
     this.map.draw(this.context, this.images);
     // redraw hud
     // hud.redraw(context);
-    this.hud.elements['score1'].redraw(this.context, 'score: ' + this.players[0].getScore(), 20, this.height-50);
-    this.hud.elements['score2'].redraw(this.context, 'score: ' + this.players[1].getScore(), 140, this.height-50);
+    
+    // Draw scores for all players
+    if (this.players.length >= 1) {
+        this.hud.elements['score1'].redraw(this.context, 'P1: ' + this.players[0].getScore(), 20, this.height-50);
+    }
+    if (this.players.length >= 2) {
+        this.hud.elements['score2'].redraw(this.context, 'P2: ' + this.players[1].getScore(), 140, this.height-50);
+    }
+    
     this.hud.elements['pause_btn'].redraw(this.context, '', this.width-120, this.height-50);
 
     // remaining time
@@ -316,6 +339,13 @@ BULANCI.Game.prototype.handleMouseClick = function(e) {
             if(key == 'newGame') {
                 this.status = 1;
                 this.hud.elements[key].hide();
+                this.hud.elements['multiplayer_btn'].hide();
+            }
+            
+            if(key == 'multiplayer_btn') {
+                this.hud.elements[key].hide();
+                this.hud.elements['newGame'].hide();
+                this.initMultiplayer();
             }
 
             if(key == 'again_btn') {
@@ -414,19 +444,37 @@ BULANCI.Game.prototype.keyBind = function() {
 
     for (var i in this.keys) {
         if (!this.keys.hasOwnProperty(i)) continue;
-        if(i == 13) { // enter
-            this.players[1].shoot();
+        
+        if (this.isMultiplayer) {
+            // In multiplayer, only control our own player
+            var myPlayer = this.players[this.myPlayerId - 1];
+            if (myPlayer) {
+                // Use WASD or arrows depending on player preference
+                if(i == 13 || i == 32) { // enter or spacebar
+                    myPlayer.shoot();
+                }
+                if(i >= 37 && i <= 40) { // arrows
+                    myPlayer.move(directions[i], this.canvas, this.elementList);
+                }
+                if(i == 65 || i == 68 || i == 83 || i == 87) { // WSAD
+                    myPlayer.move(directions[i], this.canvas, this.elementList);
+                }
+            }
+        } else {
+            // Local 2-player mode
+            if(i == 13) { // enter
+                this.players[1].shoot();
+            }
+            if(i == 32) { // spacebar
+                this.players[0].shoot();
+            }
+            if(i >= 37 && i <= 40) { // arrows
+                this.players[1].move(directions[i], this.canvas, this.elementList);
+            }
+            if(i == 65 || i == 68 || i == 83 || i == 87) { // WSAD
+                this.players[0].move(directions[i], this.canvas, this.elementList);
+            }
         }
-        if(i == 32) { // spacebar
-            this.players[0].shoot();
-        }
-        if(i >= 37 && i <= 40) { // arrows
-            this.players[1].move(directions[i], this.canvas, this.elementList);
-        }
-        if(i == 65 || i == 68 || i == 83 || i == 87) { // WSAD
-            this.players[0].move(directions[i], this.canvas, this.elementList);
-        }
-
     }
 }
 
@@ -472,4 +520,38 @@ BULANCI.Game.prototype.resize = function() {
         this.players[i].uniform(xRatio, yRatio);
     }
 
+}
+
+/**
+ * Initialize multiplayer mode
+ */
+BULANCI.Game.prototype.initMultiplayer = function() {
+    this.isMultiplayer = true;
+    this.multiplayerManager = new BULANCI.MultiplayerManager(this);
+    this.multiplayerManager.init();
+}
+
+/**
+ * Start multiplayer game with specified number of players
+ */
+BULANCI.Game.prototype.startMultiplayer = function(playerCount, myPlayerId) {
+    this.myPlayerId = myPlayerId;
+    this.players = [];
+    this.elementList = [];
+    
+    // Create players based on player count
+    var colors = ['-red', '-blue', '-green', '-yellow'];
+    
+    for (var i = 0; i < playerCount; i++) {
+        var suffix = colors[i] || '';
+        var player = new BULANCI.Player(suffix);
+        player.spawn(this.width, this.height, []);
+        this.players.push(player);
+    }
+    
+    this.elementList = this.elementList.concat(this.players);
+    
+    // Start game
+    this.status = 1;
+    this.remainingTime = this.defaultGametime;
 }

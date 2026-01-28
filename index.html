@@ -270,9 +270,15 @@
 
     <section id="content">
         <div id="game"></div>
+        <div id="multiplayer-lobby" style="display:none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000;">
+            <!-- Lobby content will be dynamically inserted here -->
+        </div>
     </section>
 
     <!-- imports & JS -->
+    <!-- PeerJS for WebRTC -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    
     <script src="resources/js/lib/howler.min.js"></script>
     <script src="resources/js/lib/meny.min.js"></script>
     <script src="resources/js/lib/array.polyfill.js"></script>
@@ -293,6 +299,7 @@
     <script src="resources/js/bulanci/Shoot.js"></script>
     <script src="resources/js/bulanci/Player.js"></script>
     <script src="resources/js/bulanci/Background.js"></script>
+    <script src="resources/js/bulanci/MultiplayerManager.js"></script>
     <script src="resources/js/bulanci/Game.js"></script>
 
     <script src="resources/js/audio.js"></script>
