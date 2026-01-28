@@ -4,7 +4,7 @@
  * @constructor
  * @author Michal Vlcek <mychalvlcek@gmail.com>
  */
-BULANCI.Shoot = function(x, y) {
+BULANCI.Shoot = function(x, y, color) {
     BULANCI.Shoot._superClass.constructor.call(this);
 
     this.x = x;
@@ -20,6 +20,10 @@ BULANCI.Shoot = function(x, y) {
     this.updateTimer;
 
     this.speed = 2;
+    this.lifetime = 0; // Track how long bullet has been alive
+    this.maxLifetime = 180; // Max frames (6 seconds at 30fps)
+    this.color = color || '#ffd649'; // default yellow
+    this.spreadOffset = 0; // for shotgun spread
 
     //this.bullets = []; // for more sophisticated weapons, Bullet class?
 
@@ -34,12 +38,12 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
         case 1:
             this.xDirection = -1;
             this.x -= 10;
-            this.y += 43;
+            this.y += 43 + this.spreadOffset;
             break;
         case 3:
             this.xDirection = 1;
             this.x += 55;
-            this.y += 22;
+            this.y += 22 + this.spreadOffset;
             break;
         case 2:
             this.yDirection = -1;
@@ -47,7 +51,7 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
             this.width = this.height;
             this.height = oldWidth;
 
-            this.x += 18;
+            this.x += 18 + this.spreadOffset;
             this.y -= 10;
             break;
         case 4:
@@ -56,7 +60,7 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
             this.width = this.height;
             this.height = oldWidth;
 
-            this.x += 34;
+            this.x += 34 + this.spreadOffset;
             this.y += 60;
             break;
     }
@@ -66,14 +70,31 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
 BULANCI.Shoot.prototype.updateShoot = function() {
     this.x += this.xDirection * this.speed;
     this.y += this.yDirection * this.speed;
-    if(this.x < 0 || this.y < 0 || this.x > canvas.width || this.y > canvas.height) {
+    this.lifetime++;
+    
+    // Deactivate bullet after max lifetime
+    if(this.lifetime > this.maxLifetime) {
         this.isActive = false;
+        return;
+    }
+    
+    // Wrap bullets around screen edges instead of destroying them
+    if(this.x < 0) {
+        this.x = canvas.width;
+    } else if(this.x > canvas.width) {
+        this.x = 0;
+    }
+    
+    if(this.y < 0) {
+        this.y = canvas.height;
+    } else if(this.y > canvas.height) {
+        this.y = 0;
     }
 }
 
 BULANCI.Shoot.prototype.draw = function(context) {
     //bullet
-    context.fillStyle = '#ffd649';
+    context.fillStyle = this.color;
     context.fillRect(this.x,this.y,this.width,this.height);
     context.beginPath();
     context.lineWidth='0.8';

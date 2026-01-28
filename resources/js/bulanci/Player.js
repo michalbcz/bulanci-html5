@@ -36,8 +36,7 @@ BULANCI.Player = function(suffix) {
     this.shootSpeed = 25;
 
     this.shoots = []; // actual shooted bullets
-    // this.weapons = [];
-    // this.activeWeapon = weapons[0];
+    this.weapon = new BULANCI.Weapon('normal'); // default weapon
 }
 inherits(BULANCI.Player, BULANCI.GameObject);
 
@@ -96,7 +95,7 @@ BULANCI.Player.prototype.move = function(key, canvas, obstacles) {
 }
 
 BULANCI.Player.prototype.hasCollision = function(x, y, obstacles) {
-    for(i = 0; i < obstacles.length; i++) {
+    for(var i = 0; i < obstacles.length; i++) {
         var r = obstacles[i];
         if(this != r) {
             if ( x + this.width < r.x || r.x + r.width < x || y + this.height < r.y || r.y + r.height < y ) {
@@ -121,11 +120,27 @@ BULANCI.Player.prototype.shoot = function(a) {
             buffer: true
         }).play();
         
-        shoot = new BULANCI.Shoot(this.x, this.y);
-        shoot.launch(this.shootSpeed, this.direction); // gun.speed
-        this.shoots.push(shoot);
+        var bulletCount = this.weapon.getBulletCount();
+        var speed = this.weapon.getSpeed();
+        var color = this.weapon.getBulletColor();
+        
+        // Fire multiple bullets for shotgun
+        for(var i = 0; i < bulletCount; i++) {
+            var shoot = new BULANCI.Shoot(this.x, this.y, color);
+            var direction = this.direction;
+            
+            // Spread bullets for shotgun
+            if(bulletCount > 1) {
+                // Offset direction slightly for spread
+                shoot.spreadOffset = (i - (bulletCount - 1) / 2) * 15;
+            }
+            
+            shoot.launch(speed, direction);
+            this.shoots.push(shoot);
+        }
+        
         this.shooting = true;
-        setTimeout(this.activeShooting.bind(this), 400);
+        setTimeout(this.activeShooting.bind(this), this.weapon.getFireRate());
     }
 }
     
@@ -278,9 +293,14 @@ BULANCI.Player.prototype.drawShadow = function(context) {
 }
 
 BULANCI.Player.prototype.isShootedBy = function(x1, y1) {
-    if(x1 >= this.x && x1 <= this.x + this.width) {
-
-        if(y1 >= (this.y+5) && y1 <= (this.y+5) + this.height) {
+    // More precise hitbox - adjusting for actual body area (not including gun)
+    var hitboxX = this.x + 5;
+    var hitboxY = this.y + 10;
+    var hitboxWidth = this.width - 10;
+    var hitboxHeight = this.height - 5;
+    
+    if(x1 >= hitboxX && x1 <= hitboxX + hitboxWidth) {
+        if(y1 >= hitboxY && y1 <= hitboxY + hitboxHeight) {
             return true;
         }
     }
@@ -297,4 +317,12 @@ BULANCI.Player.prototype.getScore = function() {
 
 BULANCI.Player.prototype.setScore = function() {
     this.score++;
+}
+
+BULANCI.Player.prototype.setWeapon = function(weaponType) {
+    this.weapon = new BULANCI.Weapon(weaponType);
+}
+
+BULANCI.Player.prototype.getWeapon = function() {
+    return this.weapon;
 }

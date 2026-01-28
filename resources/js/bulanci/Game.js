@@ -40,6 +40,7 @@ BULANCI.Game = function(debug) {
 
     this.map;
     this.players = [];
+    this.obstacles = [];
     // terrain
 
     this.elementList = [];
@@ -99,16 +100,19 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
     this.map = new BULANCI.Background();
 
     // this.elementList.push(this.map);
+    
+    // Generate random obstacles
+    this.generateObstacles();
 
     var bulanek = new BULANCI.Player('-red');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.spawn(this.width, this.height, this.obstacles);
     this.players.push(bulanek);
     
     bulanek = new BULANCI.Player('-blue');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.spawn(this.width, this.height, this.obstacles);
     this.players.push(bulanek);
 
-    this.elementList = this.elementList.concat(this.players);
+    this.elementList = this.elementList.concat(this.players).concat(this.obstacles);
 
     // HUD
     this.hud = new BULANCI.HUD();
@@ -145,6 +149,25 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
 }
 
 /**
+ * Generate random obstacles on the map
+ */
+BULANCI.Game.prototype.generateObstacles = function() {
+    var numObstacles = 3 + Math.floor(Math.random() * 3); // 3-5 obstacles
+    var minSize = 60;
+    var maxSize = 120;
+    
+    for(var i = 0; i < numObstacles; i++) {
+        var width = minSize + Math.random() * (maxSize - minSize);
+        var height = minSize + Math.random() * (maxSize - minSize);
+        var x = 100 + Math.random() * (this.width - 200 - width);
+        var y = 100 + Math.random() * (this.height - 200 - height);
+        
+        var obstacle = new BULANCI.Obstacle(x, y, width, height);
+        this.obstacles.push(obstacle);
+    }
+}
+
+/**
  * Main loop of the game.
  * All of the logic is processed here.
  */
@@ -154,13 +177,27 @@ BULANCI.Game.prototype.update = function() {
     for(i = 0; i < this.players.length; i++) {
         var shoots = this.players[i].getShoots();
         for(s = 0; s < shoots.length; s++) {
+            // Check collision with obstacles
+            for(var o = 0; o < this.obstacles.length; o++) {
+                var obstacle = this.obstacles[o];
+                var sx = shoots[s].getX();
+                var sy = shoots[s].getY();
+                var sw = shoots[s].width;
+                var sh = shoots[s].height;
+                
+                // Check if bullet rectangle overlaps with obstacle
+                if(sx + sw >= obstacle.x && sx <= obstacle.x + obstacle.width &&
+                   sy + sh >= obstacle.y && sy <= obstacle.y + obstacle.height) {
+                    shoots[s].setIsActive(false);
+                }
+            }
 
             for(p = 0; p < this.players.length; p++) {
                 if(p != i && this.players[p].isShootedBy(shoots[s].getX(), shoots[s].getY())) {
                     shoots[s].setIsActive(false);
                     this.players[i].setScore();
                     this.players[p].death();
-                    this.players[p].respawn(this.width, this.height, this.elementList);
+                    this.players[p].respawn(this.width, this.height, this.obstacles);
                 }
             }
         }
@@ -207,12 +244,19 @@ BULANCI.Game.prototype.drawMenu = function() {
     this.context.fillText('Player 1 controls:', this.width / 4, y);
     y += 40;
     this.context.fillText('WASD + spacebar', this.width / 4, y);
+    y += 30;
+    this.context.font = '14px "Helvetica"';
+    this.context.fillText('Weapons: 1-4', this.width / 4, y);
 
     y = this.height / 3;
+    this.context.font = '20px "Helvetica"';
     this.context.fillStyle = 'rgba(0,0,255,0.6)';
     this.context.fillText('Player 2 controls:', this.width / 4 * 3, y);
     y += 40;
     this.context.fillText('arrows + enter', this.width / 4 * 3, y);
+    y += 30;
+    this.context.font = '14px "Helvetica"';
+    this.context.fillText('Weapons: 7-0', this.width / 4 * 3, y);
 
     // new game button
     this.hud.elements['newGame'].redraw(this.context, '', this.width / 2 - 100, this.height / 2 - 100);
@@ -272,6 +316,12 @@ BULANCI.Game.prototype.redraw = function() {
     this.clearCanvas();
     // redraw map
     this.map.draw(this.context, this.images);
+    
+    // redraw obstacles
+    for(var i = 0; i < this.obstacles.length; i++) {
+        this.obstacles[i].draw(this.context);
+    }
+    
     // redraw hud
     // hud.redraw(context);
     this.hud.elements['score1'].redraw(this.context, 'score: ' + this.players[0].getScore(), 20, this.height-50);
@@ -365,6 +415,13 @@ BULANCI.Game.prototype.start = function() {
 BULANCI.Game.prototype.restart = function() {
     this.remainingTime = this.defaultGametime;
     this.status = 1;
+    
+    // Clear old obstacles and regenerate
+    this.obstacles = [];
+    this.generateObstacles();
+    
+    // Rebuild element list with players and new obstacles
+    this.elementList = this.players.concat(this.obstacles);
 }
 
 BULANCI.Game.prototype.setGametime = function(time) {
@@ -420,6 +477,30 @@ BULANCI.Game.prototype.keyBind = function() {
         if(i == 32) { // spacebar
             this.players[0].shoot();
         }
+        if(i == 49) { // key 1 - normal weapon for player 1
+            this.players[0].setWeapon('normal');
+        }
+        if(i == 50) { // key 2 - rapid fire for player 1
+            this.players[0].setWeapon('rapid');
+        }
+        if(i == 51) { // key 3 - sniper for player 1
+            this.players[0].setWeapon('sniper');
+        }
+        if(i == 52) { // key 4 - shotgun for player 1
+            this.players[0].setWeapon('shotgun');
+        }
+        if(i == 55) { // key 7 - normal weapon for player 2
+            this.players[1].setWeapon('normal');
+        }
+        if(i == 56) { // key 8 - rapid fire for player 2
+            this.players[1].setWeapon('rapid');
+        }
+        if(i == 57) { // key 9 - sniper for player 2
+            this.players[1].setWeapon('sniper');
+        }
+        if(i == 48) { // key 0 - shotgun for player 2
+            this.players[1].setWeapon('shotgun');
+        }
         if(i >= 37 && i <= 40) { // arrows
             this.players[1].move(directions[i], this.canvas, this.elementList);
         }
@@ -470,6 +551,10 @@ BULANCI.Game.prototype.resize = function() {
     // redraw other elements
     for(i = 0; i < this.players.length; i++) {
         this.players[i].uniform(xRatio, yRatio);
+    }
+    
+    for(i = 0; i < this.obstacles.length; i++) {
+        this.obstacles[i].uniform(xRatio, yRatio);
     }
 
 }
