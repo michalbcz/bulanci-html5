@@ -4,7 +4,7 @@
  * @constructor
  * @author Michal Vlcek <mychalvlcek@gmail.com>
  */
-BULANCI.Shoot = function(x, y) {
+BULANCI.Shoot = function(x, y, obstacles) {
     BULANCI.Shoot._superClass.constructor.call(this);
 
     this.x = x;
@@ -20,6 +20,8 @@ BULANCI.Shoot = function(x, y) {
     this.updateTimer;
 
     this.speed = 2;
+    
+    this.obstacles = obstacles || []; // obstacles that block bullets
 
     //this.bullets = []; // for more sophisticated weapons, Bullet class?
 
@@ -69,6 +71,25 @@ BULANCI.Shoot.prototype.updateShoot = function() {
     if(this.x < 0 || this.y < 0 || this.x > canvas.width || this.y > canvas.height) {
         this.isActive = false;
     }
+    // Check collision with obstacles
+    if(this.hasCollisionWithObstacles()) {
+        this.isActive = false;
+    }
+}
+
+/**
+ * Check if bullet collides with any obstacle
+ */
+BULANCI.Shoot.prototype.hasCollisionWithObstacles = function() {
+    for(var i = 0; i < this.obstacles.length; i++) {
+        var r = this.obstacles[i];
+        // AABB collision detection
+        if (!(this.x + this.width < r.x || r.x + r.width < this.x || 
+              this.y + this.height < r.y || r.y + r.height < this.y)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 BULANCI.Shoot.prototype.draw = function(context) {

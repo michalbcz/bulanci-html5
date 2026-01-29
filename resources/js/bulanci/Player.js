@@ -36,6 +36,7 @@ BULANCI.Player = function(suffix) {
     this.shootSpeed = 25;
 
     this.shoots = []; // actual shooted bullets
+    this.mapObstacles = []; // obstacles from the map that block shots
     // this.weapons = [];
     // this.activeWeapon = weapons[0];
 }
@@ -121,12 +122,19 @@ BULANCI.Player.prototype.shoot = function(a) {
             buffer: true
         }).play();
         
-        shoot = new BULANCI.Shoot(this.x, this.y);
+        shoot = new BULANCI.Shoot(this.x, this.y, this.mapObstacles);
         shoot.launch(this.shootSpeed, this.direction); // gun.speed
         this.shoots.push(shoot);
         this.shooting = true;
         setTimeout(this.activeShooting.bind(this), 400);
     }
+}
+
+/**
+ * Set map obstacles for bullet collision
+ */
+BULANCI.Player.prototype.setMapObstacles = function(obstacles) {
+    this.mapObstacles = obstacles;
 }
     
 BULANCI.Player.prototype.drawHitbox = function(context) {

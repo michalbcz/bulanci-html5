@@ -96,19 +96,26 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
     document.addEventListener('keyup', this.keyboardUnpressed.bind(this));
 
     // new BULANCI.Map()
-    this.map = new BULANCI.Background();
+    this.map = new BULANCI.TableMap();
+    
+    // Get obstacles from the map
+    var mapObstacles = this.map.getObstacles();
 
     // this.elementList.push(this.map);
 
     var bulanek = new BULANCI.Player('-red');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.setMapObstacles(mapObstacles);
+    bulanek.spawn(this.width, this.height, mapObstacles);
     this.players.push(bulanek);
     
     bulanek = new BULANCI.Player('-blue');
-    bulanek.spawn(this.width, this.height, []);
+    bulanek.setMapObstacles(mapObstacles);
+    bulanek.spawn(this.width, this.height, mapObstacles);
     this.players.push(bulanek);
 
     this.elementList = this.elementList.concat(this.players);
+    // Add map obstacles to elementList for collision detection during movement
+    this.elementList = this.elementList.concat(mapObstacles);
 
     // HUD
     this.hud = new BULANCI.HUD();
