@@ -9,6 +9,10 @@ BULANCI.Background = function(mapRegistry) {
 }
         
 BULANCI.Background.prototype.draw = function(context, images, width, height) {
+    // Use provided dimensions or fall back to context canvas dimensions
+    if (!width) width = context.canvas.width;
+    if (!height) height = context.canvas.height;
+    
     var currentMap = this.mapRegistry.getCurrentMap();
     
     if (currentMap.type === 'gradient') {

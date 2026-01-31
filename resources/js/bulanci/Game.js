@@ -25,8 +25,8 @@ BULANCI.Game = function(debug) {
     this.numFramesDrawn = 0;
     this.curFPS = 0;
 
-    this.status = -2; // -2 = map selection, 0 = main menu, 1 = playing, -1 = game over
-    this.selectedMapIndex = 0; // for keyboard navigation
+    this.status = -2; // Game status: -2 = map selection, 0 = main menu, 1 = playing, -1 = game over
+    this.selectedMapIndex = 0; // for keyboard navigation in map selection
 
     this.defaultGametime = 60; // sec
     this.remainingTime = -1;
