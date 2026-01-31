@@ -25,7 +25,8 @@ BULANCI.Game = function(debug) {
     this.numFramesDrawn = 0;
     this.curFPS = 0;
 
-    this.status = 0;
+    this.status = -2; // -2 = map selection, 0 = main menu, 1 = playing, -1 = game over
+    this.selectedMapIndex = 0; // for keyboard navigation
 
     this.defaultGametime = 60; // sec
     this.remainingTime = -1;
@@ -39,6 +40,7 @@ BULANCI.Game = function(debug) {
     this.totalLoadResources = 7;
 
     this.map;
+    this.mapRegistry;
     this.players = [];
     // terrain
 
@@ -95,8 +97,9 @@ BULANCI.Game.prototype.init = function(gameDiv, pCanvas, pheight) {
     document.addEventListener('keydown', this.keyboardPressed.bind(this));
     document.addEventListener('keyup', this.keyboardUnpressed.bind(this));
 
-    // new BULANCI.Map()
-    this.map = new BULANCI.Background();
+    // Initialize map registry and background
+    this.mapRegistry = new BULANCI.MapRegistry();
+    this.map = new BULANCI.Background(this.mapRegistry);
 
     // this.elementList.push(this.map);
 
@@ -166,7 +169,10 @@ BULANCI.Game.prototype.update = function() {
         }
     }
 
-    if(this.status == 0) {
+    if(this.status == -2) {
+        // map selection screen
+        this.drawMapSelection();
+    } else if(this.status == 0) {
         // start screen
         this.drawMenu();
         // this.status = 1;
@@ -183,8 +189,87 @@ BULANCI.Game.prototype.update = function() {
     }         
 }
 
+BULANCI.Game.prototype.drawMapSelection = function() {
+    this.map.draw(this.context, this.images, this.width, this.height);
+    this.context.rect(0, 0, this.width, this.height);
+    this.context.fillStyle = 'rgba(0,0,0,0.8)';
+    this.context.fill();
+
+    // font
+    this.context.font = '40px "Bank Gothic"';
+    this.context.fillStyle = 'rgba(230,230,230,1)';
+    this.context.fontWeight = '300';
+    this.context.textAlign = 'center';
+    this.context.textBaseline = 'middle';
+
+    // title
+    this.context.fillText('Select Map', this.width / 2, 50);
+
+    // instructions
+    this.context.font = '16px "Helvetica"';
+    this.context.fillStyle = 'rgba(200,200,200,0.8)';
+    this.context.fillText('Use arrow keys or number keys (1-5) to select, press Enter to continue', this.width / 2, 100);
+
+    // draw map options
+    var maps = this.mapRegistry.getAllMaps();
+    var mapIds = this.mapRegistry.getMapIds();
+    var startY = 150;
+    var buttonHeight = 60;
+    var buttonWidth = 400;
+    var spacing = 20;
+
+    for (var i = 0; i < mapIds.length; i++) {
+        var mapId = mapIds[i];
+        var map = maps[mapId];
+        var y = startY + i * (buttonHeight + spacing);
+        var x = this.width / 2 - buttonWidth / 2;
+
+        // highlight selected map
+        if (i === this.selectedMapIndex) {
+            this.context.strokeStyle = 'orange';
+            this.context.lineWidth = 3;
+        } else {
+            this.context.strokeStyle = 'rgb(68,68,68)';
+            this.context.lineWidth = 2;
+        }
+
+        // draw button background
+        this.context.fillStyle = 'rgba(0,0,0,0.4)';
+        this.context.fillRect(x, y, buttonWidth, buttonHeight);
+        this.context.strokeRect(x, y, buttonWidth, buttonHeight);
+
+        // draw map preview (small gradient box)
+        var previewSize = 40;
+        var previewX = x + 10;
+        var previewY = y + 10;
+        
+        if (map.gradient) {
+            var previewGradient;
+            if (map.gradient.type === 'linear') {
+                previewGradient = this.context.createLinearGradient(previewX, previewY, previewX, previewY + previewSize);
+            } else {
+                previewGradient = this.context.createRadialGradient(
+                    previewX + previewSize/2, previewY + previewSize/2, 0,
+                    previewX + previewSize/2, previewY + previewSize/2, previewSize/2
+                );
+            }
+            for (var c = 0; c < map.gradient.colors.length; c++) {
+                previewGradient.addColorStop(c / (map.gradient.colors.length - 1), map.gradient.colors[c]);
+            }
+            this.context.fillStyle = previewGradient;
+            this.context.fillRect(previewX, previewY, previewSize, previewSize);
+        }
+
+        // draw map name and number
+        this.context.font = '24px "Helvetica"';
+        this.context.fillStyle = i === this.selectedMapIndex ? 'rgba(255,200,100,1)' : 'rgba(200,200,200,0.9)';
+        this.context.textAlign = 'left';
+        this.context.fillText((i + 1) + '. ' + map.name, previewX + previewSize + 15, y + buttonHeight / 2);
+    }
+}
+
 BULANCI.Game.prototype.drawMenu = function() {
-    this.map.draw(this.context, this.images);
+    this.map.draw(this.context, this.images, this.width, this.height);
     this.context.rect(0, 0, this.width, this.height);
     this.context.fillStyle = 'rgba(0,0,0,0.8)';
     this.context.fill();
@@ -221,7 +306,7 @@ BULANCI.Game.prototype.drawMenu = function() {
 
 BULANCI.Game.prototype.drawResults = function() {
     // RESULTS
-    this.map.draw(this.context, this.images);
+    this.map.draw(this.context, this.images, this.width, this.height);
     this.context.rect(0, 0, this.width, this.height);
     this.context.fillStyle = 'rgba(0,0,0,0.8)';
     this.context.fill();
@@ -271,7 +356,7 @@ BULANCI.Game.prototype.drawResults = function() {
 BULANCI.Game.prototype.redraw = function() {
     this.clearCanvas();
     // redraw map
-    this.map.draw(this.context, this.images);
+    this.map.draw(this.context, this.images, this.width, this.height);
     // redraw hud
     // hud.redraw(context);
     this.hud.elements['score1'].redraw(this.context, 'score: ' + this.players[0].getScore(), 20, this.height-50);
@@ -432,6 +517,34 @@ BULANCI.Game.prototype.keyBind = function() {
 
 BULANCI.Game.prototype.keyboardPressed = function(e) {
     var e = e || window.event;
+    
+    // Handle map selection navigation
+    if (this.status == -2) {
+        var mapIds = this.mapRegistry.getMapIds();
+        
+        if (e.keyCode == 38) { // up arrow
+            this.selectedMapIndex = (this.selectedMapIndex - 1 + mapIds.length) % mapIds.length;
+            e.preventDefault();
+            return;
+        } else if (e.keyCode == 40) { // down arrow
+            this.selectedMapIndex = (this.selectedMapIndex + 1) % mapIds.length;
+            e.preventDefault();
+            return;
+        } else if (e.keyCode >= 49 && e.keyCode <= 53) { // number keys 1-5
+            var index = e.keyCode - 49;
+            if (index < mapIds.length) {
+                this.selectedMapIndex = index;
+            }
+            e.preventDefault();
+            return;
+        } else if (e.keyCode == 13) { // enter key
+            this.mapRegistry.setCurrentMap(mapIds[this.selectedMapIndex]);
+            this.status = 0; // go to main menu
+            e.preventDefault();
+            return;
+        }
+    }
+    
     var arrows = [37, 38, 39, 40];
     if(arrows.indexOf(e.keyCode) != -1) {
         delete this.keys[37];
