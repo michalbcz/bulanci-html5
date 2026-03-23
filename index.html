@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>HTML5Bulánci</title>
+    <title>Lulanci</title>
 
     <link rel="stylesheet" type="text/css" href="resources/css/styles.css">
     <!-- canvas support for IE -->
@@ -11,7 +11,11 @@
   </head>
   <body>
     <div id="meny">
-        <h1>Bulánci</h1>
+        <h1>Lulanci</h1>
+        <div class="menu-poster">
+            <strong>Retro duel z verejnych zachodku</strong>
+            <span>Ceskoslovenska lidova republika, rok 1990</span>
+        </div>
         <svg id="bulanci-logo" viewBox="0 0 577.259 309.238">
             <text x="230" y="-10" font-family="Bank Gothic" font-size="30" fill="white">
                 <tspan dy="1.2em">“Kdo se vleče,</tspan>
@@ -237,26 +241,27 @@
         </svg>
         <nav>
             <ul>
-                <li><a href="#" title="adf">o hře</a></li>
-                <li><a href="#" title="adf">původ</a></li>
-                <li><a href="#" title="adf">originál</a></li>
-                <li><a href="#" title="adf">multiplayer</a></li>
-                <li><a href="#" title="adf">jazyk</a></li>
-                <li><a href="#" title="adf">editor map</a></li>
-                <li><a href="#" title="adf">soundtrack</a></li>
+                <li><a href="#" title="adf">o hre</a></li>
+                <li><a href="#" title="adf">zasahy</a></li>
+                <li><a href="#" title="adf">prdiky</a></li>
+                <li><a href="#" title="adf">kabinky</a></li>
+                <li><a href="#" title="adf">pisoary</a></li>
+                <li><a href="#" title="adf">ventilace</a></li>
+                <li><a href="#" title="adf">retro 1990</a></li>
+                <li><a href="#" title="adf">lokalni duel</a></li>
             </ul>
         </nav>
         <hr />
         <p>
-            “Bulánci jsou dravé polštáře bez morálky, slitování a zábran, jež v neukojitelné touze po peří střílejí do zad a vraždí bezbranné. I přesto jsou velmi populární...”
+            “Lulanci jsou dve urputna hovinka bez studu, ktera po sobe na omelanych zachodcich z roku 1990 posilaji slizke lejno. Vyhrava ten, kdo soupere zasahne vicekrat.”
         </p>
         <hr />
-            <button id="toggle-audio">play/pause</button>
+            <button id="toggle-audio">spustit ventilaci</button>
         <hr />
         <div class="links">
-            <a href="https://www.facebook.com/bulanci" class="tooltip" title="Bulánci na Facebooku"><span class="glyph">&#228;</span></a>
-            <a href="https://github.com/vlcekmi3/bulanci-html5" class="tooltip" title="Stáhnout na githubu"><span class="glyph">&#0082;</span></a>
-            <a href="http://bulanci.cz" class="tooltip" title="http://bulanci.cz"><span class="glyph">&#161;</span></a>
+            <a href="README.md" class="tooltip" title="Popis hry"><span class="glyph">&#228;</span></a>
+            <a href="https://github.com/vlcekmi3/bulanci-html5" class="tooltip" title="Puvodni repozitar"><span class="glyph">&#0082;</span></a>
+            <a href="LICENCE.md" class="tooltip" title="Licence"><span class="glyph">&#161;</span></a>
         </div>
 
         <footer id="footer">
@@ -290,6 +295,7 @@
     <script src="resources/js/bulanci/hud/RoundedLabel.js"></script>
 
     <script src="resources/js/bulanci/GameObject.js"></script>
+    <script src="resources/js/bulanci/Bomb.js"></script>
     <script src="resources/js/bulanci/Shoot.js"></script>
     <script src="resources/js/bulanci/Player.js"></script>
     <script src="resources/js/bulanci/Background.js"></script>

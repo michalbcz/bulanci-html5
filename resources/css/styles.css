@@ -20,8 +20,7 @@
   src: url('../fonts/websymbolsligaregular.eot?#iefix') format('embedded-opentype'), url('../fonts/websymbolsligaregular.woff') format('woff'), url('../fonts/websymbolsligaregular.ttf') format('truetype'), url('../fonts/websymbolsligaregular.svg#WebSymbolsRegular') format('svg');
 }
 svg#bulanci-logo {
-  width: 260px;
-  height: 140px;
+  display: none;
 }
 svg#bulanci-logo .black {
   fill: #222222;
@@ -48,13 +47,12 @@ body {
 body {
   font-family: 'Helvetica Neue';
   font-weight: 200;
-  background-color: #222222;
-  background-image: url(../images/bulanci-logo.png), url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAGklEQVQIW2NkYGD4D8SMQAwGcAY2AbBKDBUAVuYCBQPd34sAAAAASUVORK5CYII=);
-  background-position: right -400px center, center center;
-  background-repeat: no-repeat, repeat;
+  background-color: #312b21;
+  background-image: radial-gradient(circle at top right, rgba(171, 155, 110, 0.35), transparent 32%), linear-gradient(180deg, #4f4939 0%, #262117 100%);
+  background-repeat: no-repeat;
 }
 body a {
-  color: #f938ab;
+  color: #d3c286;
   text-decoration: none;
   font-variant: bold;
   -webkit-transition: 0.15s color ease;
@@ -64,10 +62,12 @@ body a {
   transition: 0.15s color ease;
 }
 body a:hover {
-  color: #fb82ca;
+  color: #efe0ab;
 }
 body h1 {
   font-family: 'Bank Gothic';
+  letter-spacing: 0.14em;
+  margin-bottom: 12px;
 }
 body .glyph {
   font-family: 'WebSymbolsLigaRegular';
@@ -75,39 +75,59 @@ body .glyph {
 #meny {
   display: none;
   padding: 20px;
-  background: #111111;
-  color: #eee;
+  background: linear-gradient(180deg, rgba(63, 56, 40, 0.98) 0%, rgba(34, 29, 20, 0.98) 100%);
+  color: #eee5c9;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   /* footer */
+}
+#meny .menu-poster {
+  display: block;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 2px solid rgba(211, 194, 134, 0.45);
+  background: linear-gradient(180deg, rgba(220, 211, 177, 0.16), rgba(88, 73, 45, 0.12));
+}
+#meny .menu-poster strong {
+  display: block;
+  color: #f3ecd3;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+#meny .menu-poster span {
+  display: block;
+  color: #cfc196;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 #meny ul {
   margin-top: 10px;
 }
 #meny ul li {
   display: inline-block;
-  width: 200px;
+  width: 132px;
   list-style: none;
-  font-size: 20px;
+  font-size: 16px;
   padding: 3px 10px;
 }
 #meny ul li:before {
   content: '\2295';
   margin-right: 5px;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(233, 219, 166, 0.3);
 }
 #meny ul li a {
-  padding-left: 10px;
+  padding-left: 6px;
 }
 #meny button {
-  color: #dddddd;
+  color: #efe7c9;
   cursor: pointer;
   padding: .5em;
   margin: .3em;
-  width: 100px;
-  background: transparent;
-  border: 1px solid #444444;
+  width: 170px;
+  background: rgba(95, 81, 48, 0.3);
+  border: 1px solid rgba(211, 194, 134, 0.45);
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
@@ -118,29 +138,31 @@ body .glyph {
   transition: 0.25s background ease;
 }
 #meny button:hover {
-  color: #ffffff;
-  background: #444444;
+  color: #fffdf3;
+  background: rgba(148, 126, 81, 0.45);
 }
 #meny p {
   font-size: 14px;
   text-align: justify;
-  padding: 2em auto;
+  line-height: 1.65;
+  color: #ddcfab;
+  padding: 0;
 }
 #meny hr {
   margin: 1em auto;
   border: none;
-  border-top: 1px solid #444444;
+  border-top: 1px solid rgba(211, 194, 134, 0.2);
 }
 #meny .links {
   text-align: center;
 }
 #meny .links a {
   padding-right: .3em;
-  color: #5e5e5e;
+  color: #a59363;
   font-size: 40px;
 }
 #meny .links a:hover {
-  color: #b7b7b7;
+  color: #ead79c;
 }
 #meny footer {
   position: absolute;
@@ -151,9 +173,10 @@ body .glyph {
 #meny footer address p {
   font-style: normal;
   font-size: 15px;
+  color: #a89a74;
 }
 #content {
-  background: #eee;
+  background: #e0dbc9;
   width: 100%;
   height: 100%;
   -webkit-overflow-scrolling: touch;
@@ -175,25 +198,25 @@ body .glyph {
   left: 14px;
   top: 50%;
   margin-top: -16px;
-  border-left: 16px solid #333;
+  border-left: 16px solid rgba(100, 88, 60, 0.9);
 }
 .meny-right .meny-arrow {
   right: 14px;
   top: 50%;
   margin-top: -16px;
-  border-right: 16px solid #333;
+  border-right: 16px solid rgba(100, 88, 60, 0.9);
 }
 .meny-top .meny-arrow {
   left: 50%;
   top: 14px;
   margin-left: -16px;
-  border-top: 16px solid #333;
+  border-top: 16px solid rgba(100, 88, 60, 0.9);
 }
 .meny-bottom .meny-arrow {
   left: 50%;
   bottom: 14px;
   margin-left: -16px;
-  border-bottom: 16px solid #333;
+  border-bottom: 16px solid rgba(100, 88, 60, 0.9);
 }
 .meny-active .meny-arrow {
   opacity: 0;
@@ -220,8 +243,8 @@ a.tooltip[title]:before {
   padding: 4px 10px;
   text-align: center;
   text-decoration: none;
-  color: #eeeeee;
-  background-color: #000000;
+  color: #f5f0df;
+  background-color: #3f3525;
   border-radius: 4px;
   -moz-box-shadow: 0 0 2px #000000;
   -webkit-box-shadow: 0 0 2px #000000;

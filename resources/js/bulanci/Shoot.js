@@ -13,11 +13,12 @@ BULANCI.Shoot = function(x, y, obstacles) {
     this.xDirection = 0;
     this.yDirection = 0;
 
-    this.width = 10;
-    this.height = 4;
+    this.width = 14;
+    this.height = 10;
 
     this.isActive = true;
     this.updateTimer;
+    this.nearMissTargets = {};
 
     this.speed = 2;
     
@@ -35,13 +36,13 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
     switch (this.direction) {
         case 1:
             this.xDirection = -1;
-            this.x -= 10;
-            this.y += 43;
+            this.x -= 12;
+            this.y += 34;
             break;
         case 3:
             this.xDirection = 1;
-            this.x += 55;
-            this.y += 22;
+            this.x += 58;
+            this.y += 34;
             break;
         case 2:
             this.yDirection = -1;
@@ -49,8 +50,8 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
             this.width = this.height;
             this.height = oldWidth;
 
-            this.x += 18;
-            this.y -= 10;
+            this.x += 22;
+            this.y -= 14;
             break;
         case 4:
             this.yDirection = 1;
@@ -58,8 +59,8 @@ BULANCI.Shoot.prototype.launch = function(pSpeed, pDirection) {
             this.width = this.height;
             this.height = oldWidth;
 
-            this.x += 34;
-            this.y += 60;
+            this.x += 22;
+            this.y += 58;
             break;
     }
 
@@ -93,17 +94,31 @@ BULANCI.Shoot.prototype.hasCollisionWithObstacles = function() {
 }
 
 BULANCI.Shoot.prototype.draw = function(context) {
-    //bullet
-    context.fillStyle = '#ffd649';
-    context.fillRect(this.x,this.y,this.width,this.height);
+    var centerX = this.x + this.width / 2;
+    var centerY = this.y + this.height / 2;
+
+    context.save();
+    context.fillStyle = 'rgba(0,0,0,0.12)';
     context.beginPath();
-    context.lineWidth='0.8';
-    context.strokeStyle= 'rgba(0,0,0,0.8)';
-    context.rect(this.x,this.y,this.width,this.height);
+    context.ellipse(centerX + 1, centerY + 7, this.width / 2.2, this.height / 2.6, 0, 0, Math.PI * 2);
+    context.fill();
+
+    context.fillStyle = '#b79a33';
+    context.beginPath();
+    context.ellipse(centerX, centerY, this.width / 2.1, this.height / 2.2, 0, 0, Math.PI * 2);
+    context.fill();
+
+    context.fillStyle = '#d0b24d';
+    context.beginPath();
+    context.ellipse(centerX - 2, centerY - 1, this.width / 3.6, this.height / 3.6, 0, 0, Math.PI * 2);
+    context.fill();
+
+    context.strokeStyle = 'rgba(82, 58, 18, 0.9)';
+    context.lineWidth = 1;
+    context.beginPath();
+    context.ellipse(centerX, centerY, this.width / 2.1, this.height / 2.2, 0, 0, Math.PI * 2);
     context.stroke();
-    // shadow
-    context.fillStyle = 'rgba(0,0,0,0.1)';
-    context.fillRect(this.x,this.y+6,this.width,this.height);
+    context.restore();
 }
 
 BULANCI.Shoot.prototype.setIsActive = function(isActive) {
@@ -112,4 +127,12 @@ BULANCI.Shoot.prototype.setIsActive = function(isActive) {
 
 BULANCI.Shoot.prototype.getIsActive = function() {
     return this.isActive;
+}
+
+BULANCI.Shoot.prototype.hasNearMissForTarget = function(targetId) {
+    return this.nearMissTargets[targetId] === true;
+}
+
+BULANCI.Shoot.prototype.markNearMissForTarget = function(targetId) {
+    this.nearMissTargets[targetId] = true;
 }
